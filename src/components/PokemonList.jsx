@@ -1,4 +1,5 @@
-import React,{ useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import PokemonInput from "./PokemonInput";
 
 const PokemonList = () => {
   const [pokemons, setPokemons] = useState([]); // 포켓몬 데이터를 저장할 상태
@@ -6,11 +7,11 @@ const PokemonList = () => {
   const [error, setError] = useState(null); // 에러 상태 관리
 
   // API 호출 함수
-  const fetchPokemons = async () => {
+  const fetchPokemons = async (limit) => {
     try {
       setLoading(true); // 로딩 시작
       const response = await fetch(
-        "https://pokeapi.co/api/v2/pokemon?limit=251"
+        `https://pokeapi.co/api/v2/pokemon?limit=${limit}`
       );
       if (!response.ok) {
         throw new Error("데이터를 가져오는 데 실패했습니다.");
@@ -24,10 +25,15 @@ const PokemonList = () => {
     }
   };
 
-  // 컴포넌트가 마운트될 때 API 호출
+  // 페이지 처음 시작시 fetch실행
   useEffect(() => {
-    fetchPokemons();
+    fetchPokemons(15);
   }, []);
+
+  const handleInputSubmit = (limit) => {
+    fetchPokemons(limit); // 입력 값을 기반으로 포켓몬 데이터 로드
+  };
+
 
   // 로딩 상태
   if (loading) {
@@ -42,11 +48,13 @@ const PokemonList = () => {
   return (
     <div>
       <h1>포켓몬 리스트</h1>
+      <PokemonInput onInputSubmit={handleInputSubmit} />
       <ul>
         {pokemons.map((pokemon, index) => {
           const pokemonId = pokemon.url.split("/").slice(-2, -1)[0];
           return (
             <li key={index}>
+              <span>{index+1}</span>
               <img
                 src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`}
                 alt={pokemon.name}
